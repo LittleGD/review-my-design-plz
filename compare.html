@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Before & After</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root { --chrome-h: 56px; --handle-w: 48px; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: #0A0A10;
+      color: white;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ─── TOP CHROME ─── */
+    .chrome {
+      height: var(--chrome-h);
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+    .chrome-left { display: flex; align-items: center; gap: 16px; }
+    .chrome-logo { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; }
+    .chrome-logo span { color: #6C63FF; }
+    .chrome-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); }
+    .chrome-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.4); }
+    .chrome-badges { display: flex; gap: 8px; }
+    .badge {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 4px 12px; border-radius: 99px;
+    }
+    .badge-before {
+      background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .badge-after {
+      background: rgba(108,99,255,0.2); color: #A78BFA;
+      border: 1px solid rgba(108,99,255,0.3);
+    }
+    .chrome-hint { font-size: 12px; color: rgba(255,255,255,0.28); font-weight: 500; }
+
+    /* ─── STAGE ─── */
+    .stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: ew-resize;
+    }
+
+    /* After — full width, behind */
+    .frame-after {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+      z-index: 1;
+    }
+
+    /*
+      Before — wrapper clips the iframe by controlling its width.
+      This avoids clip-path on iframes (which forces full recomposition each frame).
+      The iframe inside stays wide = stage width so internal layout doesn't shift.
+    */
+    .before-clip {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 50%;           /* JS changes this */
+      overflow: hidden;
+      z-index: 2;
+      will-change: width;   /* tell browser to prepare compositing layer */
+    }
+    .frame-before {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      border: none;
+      /* JS sets width = stage.offsetWidth so it mirrors the after iframe exactly */
+    }
+
+    /* ─── DIVIDER LINE ─── */
+    .divider-line {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: white;
+      z-index: 20;
+      pointer-events: none;
+      will-change: left;
+      box-shadow: 0 0 10px rgba(108,99,255,0.7), 0 0 2px rgba(255,255,255,0.9);
+    }
+
+    /* ─── DRAG HANDLE ─── */
+    .handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 30;
+      width: var(--handle-w);
+      height: var(--handle-w);
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.5), 0 0 0 3px rgba(108,99,255,0.5);
+      cursor: ew-resize;
+      display: flex; align-items: center; justify-content: center;
+      will-change: left;
+      /* Only transition non-positional properties */
+      transition: box-shadow 150ms ease, transform 80ms ease;
+    }
+    .handle:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.55), 0 0 0 4px rgba(108,99,255,0.6);
+    }
+    .handle.dragging {
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 0 5px rgba(108,99,255,0.7);
+      cursor: grabbing;
+    }
+    .handle-arrows { display: flex; align-items: center; gap: 5px; }
+    .arrow-l, .arrow-r { width: 0; height: 0; }
+    .arrow-l { border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-right: 6px solid #6C63FF; }
+    .arrow-r { border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 6px solid #6C63FF; }
+
+    /* ─── FLOATING LABELS ─── */
+    .label {
+      position: absolute;
+      top: 20px;
+      z-index: 15;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 5px 12px;
+      border-radius: 99px; pointer-events: none;
+      transition: opacity 180ms ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .label-before {
+      left: 20px;
+      background: rgba(0,0,0,0.5); color: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .label-after {
+      right: 20px;
+      background: rgba(108,99,255,0.28); color: #C4B5FD;
+      border: 1px solid rgba(108,99,255,0.35);
+    }
+
+    /* ─── REVIEW PANEL ─── */
+    .review-toggle {
+      position: absolute;
+      bottom: 60px; right: 20px;
+      z-index: 40;
+      background: rgba(108,99,255,0.85);
+      color: white; border: none;
+      border-radius: 10px; padding: 8px 14px;
+      font-size: 12px; font-weight: 700; font-family: inherit;
+      cursor: pointer; letter-spacing: 0.04em;
+      transition: background 140ms ease, transform 140ms ease;
+      box-shadow: 0 4px 16px rgba(108,99,255,0.4);
+    }
+    .review-toggle:hover { background: rgba(108,99,255,0.95); transform: translateY(-1px); }
+    .review-toggle:active { transform: scale(0.97); }
+    .review-panel {
+      position: absolute;
+      bottom: 104px; right: 20px;
+      z-index: 40; width: 320px;
+      background: rgba(12,11,24,0.96);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+      display: none;
+    }
+    .review-panel.open { display: block; }
+    .review-panel h3 { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: rgba(255,255,255,0.9); }
+    .score-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+    }
+    .score-row:last-of-type { border-bottom: none; }
+    .score-reviewer { color: rgba(255,255,255,0.5); }
+    .score-val { font-weight: 700; font-size: 13px; }
+    .score-before { color: rgba(255,255,255,0.3); }
+    .score-arrow { color: rgba(255,255,255,0.18); margin: 0 4px; }
+    .score-after { color: #A78BFA; }
+    .review-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 12px 0; }
+    .review-tag {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px; margin: 2px 2px 2px 0;
+    }
+    .tag-red    { background: rgba(239,68,68,0.14);    color: #FCA5A5; }
+    .tag-yellow { background: rgba(251,191,36,0.14);   color: #FCD34D; }
+    .tag-green  { background: rgba(52,211,153,0.14);   color: #6EE7B7; }
+
+    /* ─── BOTTOM BAR ─── */
+    .stats-bar {
+      height: 44px;
+      background: rgba(255,255,255,0.025);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center; gap: 28px;
+      flex-shrink: 0;
+    }
+    .stat-item { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.3); }
+    .stat-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .stat-dot.violet { background: #6C63FF; }
+    .stat-dot.green  { background: #34D399; }
+    .stat-dot.amber  { background: #FBBF24; }
+    .stat-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.07); }
+  </style>
+</head>
+<body>
+
+  <header class="chrome">
+    <div class="chrome-left">
+      <div class="chrome-logo">Task<span>Flow</span></div>
+      <div class="chrome-divider"></div>
+      <div class="chrome-title">Before & After</div>
+    </div>
+    <div class="chrome-badges">
+      <span class="badge badge-before">Before</span>
+      <span class="badge badge-after">After · /design-review-panel</span>
+    </div>
+    <div class="chrome-hint">← Drag to compare →</div>
+  </header>
+
+  <div class="stage" id="stage">
+
+    <!-- After (bottom layer, always full width) -->
+    <iframe class="frame-after" id="frameAfter" src="after.html" title="After: improved"></iframe>
+
+    <!-- Before (top layer, clipped by wrapper width) -->
+    <div class="before-clip" id="beforeClip">
+      <iframe class="frame-before" id="frameBefore" src="before.html" title="Before: original"></iframe>
+    </div>
+
+    <!-- Labels -->
+    <div class="label label-before" id="labelBefore">Before</div>
+    <div class="label label-after"  id="labelAfter">After</div>
+
+    <!-- Divider -->
+    <div class="divider-line" id="dividerLine"></div>
+
+    <!-- Handle -->
+    <div class="handle" id="handle"
+         role="slider" aria-label="Comparison slider"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+         tabindex="0">
+      <div class="handle-arrows">
+        <div class="arrow-l"></div>
+        <div class="arrow-r"></div>
+      </div>
+    </div>
+
+    <!-- Review panel -->
+    <button class="review-toggle" id="reviewToggle" aria-expanded="false" aria-controls="reviewPanel">
+      📊 Review Scores
+    </button>
+    <div class="review-panel" id="reviewPanel" role="region" aria-label="Design review scores">
+      <h3>🎨 Design Review Panel — v2 polish pass</h3>
+      <div class="score-row">
+        <span class="score-reviewer">🎯 UX Strategist</span>
+        <span><span class="score-val score-before">4/10</span><span class="score-arrow">→</span><span class="score-val score-after">9/10</span></span>
+      </div>
+      <div class="score-row">
+        <span class="score-reviewer">✨ Craft Reviewer</span>
+        <span><span class="score-val score-before">4/10</span><span class="score-arrow">→</span><span class="score-val score-after">8.8/10</span></span>
+      </div>
+      <div class="score-row">
+        <span class="score-reviewer">🎬 Motion &amp; Polish</span>
+        <span><span class="score-val score-before">4/10</span><span class="score-arrow">→</span><span class="score-val score-after">8.8/10</span></span>
+      </div>
+      <div class="review-divider"></div>
+      <div class="score-row" style="font-weight:700;">
+        <span style="color:rgba(255,255,255,0.85)">Overall</span>
+        <span><span class="score-val score-before">4.0/10</span><span class="score-arrow">→</span><span class="score-val score-after" style="font-size:15px">8.9/10</span></span>
+      </div>
+      <div class="review-divider"></div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:700;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:8px;">v2 Polish Improvements</div>
+      <div>
+        <span class="review-tag tag-red">Working hamburger</span>
+        <span class="review-tag tag-red">WCAG AA contrast</span>
+        <span class="review-tag tag-red">noscript fallback</span>
+        <span class="review-tag tag-yellow">Tabular numerals</span>
+        <span class="review-tag tag-yellow">Fraunces italic</span>
+        <span class="review-tag tag-yellow">Terracotta accent</span>
+        <span class="review-tag tag-yellow">Asymmetric grid</span>
+        <span class="review-tag tag-yellow">Active section nav</span>
+        <span class="review-tag tag-green">M3 + HIG type</span>
+        <span class="review-tag tag-green">Hero entrance</span>
+        <span class="review-tag tag-green">SVG sprite</span>
+        <span class="review-tag tag-green">Geometric stagger</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-dot violet"></span><span>TaskFlow · fictional SaaS</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item"><span class="stat-dot green"></span><span>Before: before.html</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-item"><span class="stat-dot amber"></span><span>After: /design-review-panel applied</span></div>
+  </div>
+
+  <script>
+    const stage       = document.getElementById('stage');
+    const handle      = document.getElementById('handle');
+    const beforeClip  = document.getElementById('beforeClip');
+    const frameBefore = document.getElementById('frameBefore');
+    const frameAfter  = document.getElementById('frameAfter');
+    const dividerLine = document.getElementById('dividerLine');
+    const labelBefore = document.getElementById('labelBefore');
+    const labelAfter  = document.getElementById('labelAfter');
+    const reviewToggle = document.getElementById('reviewToggle');
+    const reviewPanel  = document.getElementById('reviewPanel');
+
+    let pos = 50;
+    let dragging = false;
+    let rafId = null;
+    let pendingX = null;
+
+    function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+    function setFrameWidth() {
+      // Make the before iframe exactly as wide as the stage so layout matches after
+      frameBefore.style.width = stage.offsetWidth + 'px';
+    }
+
+    function applyPosition() {
+      const pct = pos + '%';
+      // Batch DOM writes — no reading here
+      beforeClip.style.width  = pct;
+      handle.style.left       = pct;
+      dividerLine.style.left  = pct;
+      handle.setAttribute('aria-valuenow', Math.round(pos));
+      labelBefore.style.opacity = pos < 12 ? '0' : '1';
+      labelAfter.style.opacity  = pos > 88 ? '0' : '1';
+      rafId = null;
+    }
+
+    function scheduleUpdate(clientX) {
+      const rect = stage.getBoundingClientRect();
+      pos = clamp((clientX - rect.left) / rect.width * 100, 1, 99);
+      if (rafId === null) {
+        rafId = requestAnimationFrame(applyPosition);
+      }
+    }
+
+    function startDrag() {
+      dragging = true;
+      handle.classList.add('dragging');
+      // Disable pointer events on iframes so mouse events aren't swallowed
+      frameBefore.style.pointerEvents = 'none';
+      frameAfter.style.pointerEvents  = 'none';
+    }
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove('dragging');
+      frameBefore.style.pointerEvents = '';
+      frameAfter.style.pointerEvents  = '';
+    }
+
+    // Mouse
+    handle.addEventListener('mousedown', e => { startDrag(); e.preventDefault(); });
+    document.addEventListener('mousemove', e => { if (dragging) scheduleUpdate(e.clientX); });
+    document.addEventListener('mouseup', endDrag);
+
+    // Touch
+    handle.addEventListener('touchstart', e => { startDrag(); e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      scheduleUpdate(e.touches[0].clientX);
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', endDrag);
+
+    // Click anywhere on stage to jump
+    stage.addEventListener('click', e => {
+      if (e.target === handle || handle.contains(e.target)) return;
+      scheduleUpdate(e.clientX);
+      requestAnimationFrame(applyPosition);
+    });
+
+    // Keyboard
+    handle.addEventListener('keydown', e => {
+      const step = e.shiftKey ? 10 : 2;
+      if (e.key === 'ArrowLeft')  { pos = clamp(pos - step, 1, 99); applyPosition(); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { pos = clamp(pos + step, 1, 99); applyPosition(); e.preventDefault(); }
+    });
+
+    // Review panel
+    reviewToggle.addEventListener('click', () => {
+      const open = reviewPanel.classList.toggle('open');
+      reviewToggle.setAttribute('aria-expanded', String(open));
+    });
+
+    // Scroll sync
+    let syncLock = false;
+    function syncScrollOf(src, dst) {
+      try {
+        src.contentWindow.addEventListener('scroll', () => {
+          if (syncLock) return;
+          syncLock = true;
+          try { dst.contentWindow.scrollTo(0, src.contentWindow.scrollY); } catch(_) {}
+          requestAnimationFrame(() => { syncLock = false; });
+        }, { passive: true });
+      } catch(_) {}
+    }
+    // Set up sync after both iframes load
+    let loadCount = 0;
+    function onFrameLoad() {
+      loadCount++;
+      if (loadCount === 2) {
+        syncScrollOf(frameBefore, frameAfter);
+        syncScrollOf(frameAfter, frameBefore);
+      }
+    }
+    frameBefore.addEventListener('load', onFrameLoad);
+    frameAfter.addEventListener('load', onFrameLoad);
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      setFrameWidth();
+      applyPosition();
+    });
+
+    // Init
+    setFrameWidth();
+    applyPosition();
+  </script>
+</body>
+</html>

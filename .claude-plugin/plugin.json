@@ -1,0 +1,11 @@
+{
+  "name": "design-review-panel",
+  "description": "3-person design review panel. UX Strategist, Craft Reviewer, and Motion/Polish Reviewer run parallel reviews and produce a unified report.",
+  "version": "1.0.0",
+  "author": {
+    "name": "jmlee"
+  },
+  "homepage": "https://github.com/LittleGD/review-my-design-plz",
+  "repository": "https://github.com/LittleGD/review-my-design-plz",
+  "skills": "./.claude/skills"
+}
