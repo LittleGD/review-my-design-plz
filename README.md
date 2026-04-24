@@ -19,25 +19,29 @@
 
 ## What This Does
 
-One command triggers three parallel design reviews of your UI code, each from a different expert perspective. The results are cross-referenced and consolidated into a single actionable report.
+One command triggers up to three parallel design reviews of your UI code, each from a different expert perspective with an **exclusive scope**. The results are cross-referenced and consolidated into a single actionable report with evidence citations.
 
 **No dependencies.** All review criteria are self-contained — you don't need to install any other skills or plugins.
 
-| Reviewer | Focus |
-|----------|-------|
-| 🎯 **UX Strategist** | Accessibility, touch targets, **3-tier responsive breakpoints** (Mobile/Tablet/Desktop), forms, keyboard navigation, semantic color tokens |
-| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **M3 + Apple HIG typography system**, surface depth, CSS structure, intentional design decisions |
-| 🎬 **Motion & Polish** | Animation decisions, easing curves, performance, `:active` states, `prefers-reduced-motion`, hardware acceleration |
+| Reviewer | Owns (exclusive) |
+|----------|------------------|
+| 🎯 **UX Strategist** | Accessibility (WCAG / APCA), touch targets, **3-tier responsive breakpoints** (Mobile/Tablet/Desktop, M3 window size classes), forms, keyboard navigation, empty/error/loading states, semantic color tokens, z-index system |
+| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **M3 + Apple HIG typography system**, surface depth, CSS structure, intent vs defaults, **modern CSS** (container queries, logical properties, OKLCH, `:has()`, CSS nesting, view transitions, `@layer`) |
+| 🎬 **Motion & Polish** | Animation decisions, easing curves, duration, hardware acceleration, `prefers-reduced-motion`, hover media queries, scroll-driven animations, asymmetric enter/exit, stagger |
+
+Scope overlap has been deliberately removed so "2+ reviewers agree" is a true consensus signal, not an artifact of duplicate checklists.
 
 ### The Report
 
-- **🔴 Urgent Fixes** — issues flagged by 2+ reviewers (consensus)
+- **Project context detected** — Tailwind / Panda / design-token probes surface the project's real breakpoints and tokens, so reviewers adapt instead of imposing defaults
+- **🔴 Urgent Fixes** — issues flagged by 2+ reviewers (canonical-dimension consensus)
 - **🟡 Recommended** — important issues from a single reviewer
 - **🟢 Polish** — minor improvements
 - **⚡ Disagreements** — conflicting opinions with both sides' reasoning
 - **Action Plan** — numbered items ordered by priority
+- **Scope caveats** — what each reviewer couldn't evaluate (N/A) so you know what *wasn't* checked
 
-Reports are generated in **English** or **Korean** based on your input language.
+Every finding cites evidence (line range or region). Overall score is the **median** of three reviewer scores (robust to one outlier), not a naive mean. Reports are generated in **English** or **Korean** based on your input language.
 
 ---
 
@@ -63,21 +67,44 @@ Restart Claude Code after installation.
 ## Usage
 
 ```bash
-# Review a specific file
+# Review a specific file with all three reviewers
 /design-review-panel src/components/Button.tsx
 
 # Review without arguments (will ask for target)
 /design-review-panel
 
-# Works with any UI file
-/design-review-panel app/dashboard/page.tsx
+# Run only selected reviewers
+/design-review-panel src/components/Hero.tsx --only=craft,motion
+
+# Pass a role hint so criteria weight appropriately
+/design-review-panel app/marketing/page.tsx --context=marketing
+
+# Use APCA contrast instead of WCAG 2
+/design-review-panel src/components/Card.tsx --contrast=apca
+
+# Review a screenshot
+/design-review-panel screenshots/dashboard.png --context=dashboard
 ```
+
+### Grammar
+
+```
+<path> [--only=<list>] [--context=<hint>] [--contrast=<mode>]
+```
+
+- `--only` — subset of `ux,craft,motion` (default: all three)
+- `--context` — role hint like `marketing`, `dashboard`, `design-system`, `form`, `landing`, `auth`
+- `--contrast` — `wcag` (default) or `apca`
 
 ### Supported Inputs
 
 - **Source code files** — `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html`, `.css`, etc.
-- **Screenshots** — `.png`, `.jpg`, `.webp`, `.gif` (visual review mode)
-- **Large files** (>500 lines) — will ask whether to review entirely or by section
+- **Screenshots** — `.png`, `.jpg`, `.webp`, `.gif` (agents Read the image themselves)
+- **Large files** (>500 lines) — first 250 + last 50 lines inlined, full file Readable on demand (not inlined three times)
+
+### Project Probe
+
+Before dispatching reviewers, the skill probes for `tailwind.config.*`, Panda, `styled-system`, `globals.css`, and token files (≤ 500ms, time-boxed). If breakpoints or tokens are found, reviewers use them. Otherwise they fall back to M3 + HIG defaults. This means **Tailwind projects are not flagged for "wrong" breakpoints** — the skill adapts.
 
 ---
 
@@ -85,37 +112,40 @@ Restart Claude Code after installation.
 
 ### 🎯 UX Strategist
 
-A 16-point checklist grounded in WCAG, Apple HIG, and Material Design 3:
+Grounded in WCAG 2 / APCA, Apple HIG, and Material Design 3 window size classes:
 
-- WCAG contrast ratios (4.5:1 normal, 3:1 large)
-- Touch targets (≥ 44×44px on mobile/tablet, ≥ 8px spacing)
-- Keyboard navigation, focus rings, semantic alt text & aria-labels
-- Loading / error / empty states, visible form labels
-- **3-tier responsive design** — explicit `Mobile ≤ 599px`, `Tablet 600–1023px`, `Desktop ≥ 1024px` breakpoints (M3 window size classes), layout *adapts* not just *shrinks*, working hamburger with `aria-expanded` + ESC + body-scroll-lock, padding/margin steps per breakpoint, no `768px` catch-all
-- Spacing system on a 4 / 8px grid, semantic color tokens, consistent z-index scale
-- `prefers-reduced-motion` respected
+- **Contrast** — WCAG (4.5:1 text, 3:1 large/UI) or APCA (Lc 75 body, Lc 60 large, Lc 45 non-text) via `--contrast` flag
+- Touch targets (≥ 44×44px Apple HIG / ≥ 48dp Material, ≥ 8px spacing)
+- Keyboard navigation, focus indicators, semantic alt text & aria-labels
+- Loading / error / empty states, visible form labels with required indicators
+- **Responsive design** — Mobile ≤ 599 / Tablet 600–839 / Desktop 840–1199 / Large ≥ 1200 (M3 compact/medium/expanded/large window size classes). Uses **your project's breakpoints** when the probe finds them (Tailwind, Panda, etc.). Layout must adapt, not just shrink; hamburger requires `aria-expanded` + ESC + body scroll lock
+- Semantic color tokens over raw hex, consistent z-index scale
 
 ### ✨ Craft Reviewer
 
 Reviews code the way a design lead reviews a junior's work — *"would I put my name on this?"*
 
 - Layout rhythm and intentional proportions (the focal-point test)
-- **Typography System (M3 + Apple HIG synthesis)** — every text style maps to a *role* (Display / Headline / Title / Body / Label / Caption), not a raw px value. Reference scale spans Mobile/Tablet/Desktop with paired sizes + line-heights + weights + tracking. Body ≥ 16px on mobile (iOS auto-zoom + HIG Dynamic Type baseline). Tabular numerals on data, real italic cuts only, multi-axis hierarchy beyond size alone.
+- **Spacing grid** — every value a multiple of 4 (Tailwind `p-[13px]` fails)
+- **Typography System (M3 + Apple HIG synthesis)** — every text style maps to a *role* (Display / Headline / Title / Body / Label / Caption), not a raw px value. Reference scale spans Mobile/Tablet/Desktop with paired sizes + line-heights + weights + tracking. Body ≥ 16px on mobile (iOS auto-zoom + HIG Dynamic Type baseline). Tabular numerals on data, real italic cuts only, multi-axis hierarchy beyond size alone, variable-font axes where available.
 - Surface depth through tonal shifts — the *border-removal test*
 - One committed depth strategy (no mixing borders + shadows + surface shifts)
 - CSS structure quality — no negative-margin hacks, no calc() workarounds, no absolute-position escapes
+- **Modern CSS adoption (2024–2026 baseline)** — flags missing use of container queries (`@container`), logical properties (`margin-inline`, `padding-block`), `:has()`, `:is()`/`:where()`, CSS nesting, OKLCH / Display-P3, View Transitions API, and `@layer` cascade control — but only where the project would meaningfully benefit
 - The *swap test* — would defaults feel any different?
 
 ### 🎬 Motion & Polish Reviewer
 
-Based on [Emil Kowalski's](https://emilkowal.ski/) design engineering principles — 16-point animation checklist:
+Based on [Emil Kowalski's](https://emilkowal.ski/) design engineering principles — 17-point animation checklist:
 
-- Easing selection (ease-out for entries, custom curves for punch)
-- Duration limits (<300ms for UI elements)
-- Hardware acceleration (`transform` + `opacity` only)
-- Button `:active` states, hover media queries
-- `prefers-reduced-motion` support, asymmetric enter/exit timing, stagger
-- Output uses **Before | After | Why** table format
+- Easing selection (ease-out for entries, ease-in for exits, custom curves for punch)
+- Duration limits (<300ms for UI elements; hero/marketing may exceed deliberately)
+- Hardware acceleration (`transform`, `opacity`, `filter`, `clip-path` only)
+- Button `:active` states, hover media queries (`@media (hover: hover) and (pointer: fine)`)
+- `prefers-reduced-motion` support, asymmetric enter/exit timing, stagger (30–80ms)
+- **View Transitions API** and scroll-driven animations where relevant
+- No animations on 100+×/day shortcuts (save, submit) — or drop to <50ms
+- Output uses **Before | After | Why** table format with per-row severity + confidence
 
 ---
 

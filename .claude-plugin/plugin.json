@@ -1,7 +1,7 @@
 {
   "name": "design-review-panel",
-  "description": "3-person design review panel. UX Strategist, Craft Reviewer, and Motion/Polish Reviewer run parallel reviews and produce a unified report.",
-  "version": "1.0.0",
+  "description": "3-person design review panel with exclusive scopes, project-aware probing (Tailwind/Panda/design tokens), scoped runs (--only), role hints (--context), and WCAG/APCA contrast modes. UX Strategist, Craft Reviewer, and Motion/Polish Reviewer run in parallel and produce a unified, evidence-cited report.",
+  "version": "1.1.0",
   "author": {
     "name": "jmlee"
   },
