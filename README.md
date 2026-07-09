@@ -1,17 +1,17 @@
 # Design Review Panel
 
 <p align="center">
-  <strong>Three Expert Eyes on Every Component</strong>
+  <strong>A Review Panel That Sizes Itself to Your Component</strong>
 </p>
 
 <p align="center">
-  Three specialized design reviewers examine your UI code in parallel and deliver a unified, prioritized report.
+  A core trio of design reviewers — plus specialists drafted automatically when your code needs them — examine your UI in parallel and deliver a unified, verified, prioritized report.
 </p>
 
 <p align="center">
   <a href="#installation">Install</a> ·
   <a href="#usage">Usage</a> ·
-  <a href="#reviewers">Reviewers</a> ·
+  <a href="#the-panel">The Panel</a> ·
   <a href="#example-output">Example</a>
 </p>
 
@@ -19,29 +19,44 @@
 
 ## What This Does
 
-One command triggers up to three parallel design reviews of your UI code, each from a different expert perspective with an **exclusive scope**. The results are cross-referenced and consolidated into a single actionable report with evidence citations.
+One command assembles a design review panel for your UI code. Three core reviewers always serve; up to five specialists are **auto-drafted when the target shows relevant signals** (chart imports draft the Data-Viz reviewer, dark-mode classes draft the Token Architect, i18n libraries draft the i18n reviewer…). There is **no fixed cap on panel size** — the panel is as large as the target warrants.
+
+All reviewers run **in parallel**, each with an **exclusive scope**. Findings are cross-referenced, consensus issues are **adversarially verified** by a second wave of agents that try to refute them against your actual source, and everything lands in one actionable report with evidence citations.
 
 **No dependencies.** All review criteria are self-contained — you don't need to install any other skills or plugins.
 
+### Core trio (always on)
+
 | Reviewer | Owns (exclusive) |
 |----------|------------------|
-| 🎯 **UX Strategist** | Accessibility (WCAG / APCA), touch targets, **3-tier responsive breakpoints** (Mobile/Tablet/Desktop, M3 window size classes), forms, keyboard navigation, empty/error/loading states, semantic color tokens, z-index system |
-| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **M3 + Apple HIG typography system**, surface depth, CSS structure, intent vs defaults, **modern CSS** (container queries, logical properties, OKLCH, `:has()`, CSS nesting, view transitions, `@layer`) |
+| 🎯 **UX Strategist** | Accessibility (WCAG / APCA), touch targets, **3-tier responsive breakpoints** (M3 window size classes), forms, keyboard navigation, empty/error/loading states |
+| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **M3 + Apple HIG typography system**, surface depth, CSS structure, intent vs defaults, **modern CSS** (container queries, `:has()`, CSS nesting, OKLCH, view transitions, `@layer`) |
 | 🎬 **Motion & Polish** | Animation decisions, easing curves, duration, hardware acceleration, `prefers-reduced-motion`, hover media queries, scroll-driven animations, asymmetric enter/exit, stagger |
 
-Scope overlap has been deliberately removed so "2+ reviewers agree" is a true consensus signal, not an artifact of duplicate checklists.
+### Specialists (drafted on signal, or via `--add` / `--panel=full`)
+
+| Reviewer | Owns (exclusive) | Drafted when |
+|----------|------------------|--------------|
+| 🧱 **Token & Theme Architect** | Token architecture (primitive→semantic→component), semantic color tokens, z-index scale, **dark mode & theming** (`light-dark()`, `color-scheme`), token naming | Token files, ≥10 custom properties, or dark-mode markers |
+| 🚀 **Performance & Rendering** | Image dimensions/CLS, lazy loading, `fetchpriority`, font loading, `content-visibility`, resting `will-change`, expensive paint | Images, video, `@font-face`, or marketing/landing context |
+| 🌍 **i18n & Adaptivity** | Logical properties, RTL safety, text-expansion tolerance, truncation, `Intl.*` locale formats, `lang` attributes | i18n libraries, `dir=`, locale files |
+| 🧭 **Content & Microcopy** | Wording of CTAs/errors/empty states, capitalization system, placeholder copy, tone, progressive feedback | Copy-heavy targets or marketing/auth context |
+| 📊 **Data-Viz** | Chart color scales, redundant encoding, axes/zero-baseline, legends, tabular numerals, number formatting | Chart libraries, `<canvas>`, data tables, dashboard context |
+
+Scopes stay exclusive even as the panel grows: when a specialist is drafted, overlapping dimensions **transfer ownership** (e.g., semantic color tokens move from UX to the Token Architect for that run), so "2+ reviewers agree" remains a true consensus signal, never a duplicate-checklist artifact.
 
 ### The Report
 
+- **Panel composition** — which reviewers served and *why* each specialist was or wasn't drafted
 - **Project context detected** — Tailwind / Panda / design-token probes surface the project's real breakpoints and tokens, so reviewers adapt instead of imposing defaults
-- **🔴 Urgent Fixes** — issues flagged by 2+ reviewers (canonical-dimension consensus)
+- **🔴 Urgent Fixes** — issues flagged by 2+ reviewers, each **✓-verified** by an adversarial agent that tried to refute it against your source
 - **🟡 Recommended** — important issues from a single reviewer
 - **🟢 Polish** — minor improvements
-- **⚡ Disagreements** — conflicting opinions with both sides' reasoning
+- **⚡ Disagreements & Refuted Findings** — conflicting opinions and any finding the verification wave shot down (never silently deleted)
 - **Action Plan** — numbered items ordered by priority
-- **Scope caveats** — what each reviewer couldn't evaluate (N/A) so you know what *wasn't* checked
+- **Scope caveats** — what each reviewer couldn't evaluate, plus which specialists were *not* drafted so you know what wasn't checked
 
-Every finding cites evidence (line range or region). Overall score is the **median** of three reviewer scores (robust to one outlier), not a naive mean. Reports are generated in **English** or **Korean** based on your input language.
+Every finding cites evidence (line range or region) and a canonical dimension tag. Overall score is the **median of all participating reviewers** (robust to outliers at any panel size). Reports are generated in **English** or **Korean** based on your input language.
 
 ---
 
@@ -67,48 +82,65 @@ Restart Claude Code after installation.
 ## Usage
 
 ```bash
-# Review a specific file with all three reviewers
+# Auto-sized panel (core trio + signal-drafted specialists)
 /design-review-panel src/components/Button.tsx
 
-# Review without arguments (will ask for target)
-/design-review-panel
+# Legacy 3-person behavior
+/design-review-panel src/components/Button.tsx --panel=core
 
-# Run only selected reviewers
-/design-review-panel src/components/Hero.tsx --only=craft,motion
+# Run the entire 8-role roster
+/design-review-panel src/app/dashboard/page.tsx --panel=full
 
-# Pass a role hint so criteria weight appropriately
+# Exact panel of your choosing
+/design-review-panel src/components/Hero.tsx --only=craft,motion,perf
+
+# Force-draft specialists on top of auto selection
+/design-review-panel src/components/Chart.tsx --add=dataviz,tokens
+
+# Role hint (weights criteria AND feeds draft signals)
 /design-review-panel app/marketing/page.tsx --context=marketing
 
-# Use APCA contrast instead of WCAG 2
+# APCA contrast instead of WCAG 2
 /design-review-panel src/components/Card.tsx --contrast=apca
+
+# Verify recommended findings too, or skip verification
+/design-review-panel src/components/Nav.tsx --verify=all
+/design-review-panel src/components/Nav.tsx --verify=off
 
 # Review a screenshot
 /design-review-panel screenshots/dashboard.png --context=dashboard
+
+# Review a small set of files together
+/design-review-panel "src/components/Card/*.{tsx,css}"
 ```
 
 ### Grammar
 
 ```
-<path> [--only=<list>] [--context=<hint>] [--contrast=<mode>]
+<path|glob|image> [--only=<list>] [--add=<list>] [--panel=<mode>] [--context=<hint>] [--contrast=<mode>] [--verify=<mode>]
 ```
 
-- `--only` — subset of `ux,craft,motion` (default: all three)
+- `--panel` — `auto` (default), `core` (trio only), `full` (entire roster)
+- `--only` — exact panel from `ux,craft,motion,tokens,perf,i18n,content,dataviz`
+- `--add` — force-draft specialists on top of the panel-mode selection
 - `--context` — role hint like `marketing`, `dashboard`, `design-system`, `form`, `landing`, `auth`
 - `--contrast` — `wcag` (default) or `apca`
+- `--verify` — `urgent` (default: adversarially verify consensus findings), `all`, `off`
 
 ### Supported Inputs
 
 - **Source code files** — `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html`, `.css`, etc.
+- **Globs / small directories** — up to 5 files reviewed together as one target set
 - **Screenshots** — `.png`, `.jpg`, `.webp`, `.gif` (agents Read the image themselves)
-- **Large files** (>500 lines) — first 250 + last 50 lines inlined, full file Readable on demand (not inlined three times)
+- **Large files** (>500 lines) — first 250 + last 50 lines inlined, full file Readable on demand (never inlined once per agent)
 
 ### Project Probe
 
-Before dispatching reviewers, the skill probes for `tailwind.config.*`, Panda, `styled-system`, `globals.css`, and token files (≤ 500ms, time-boxed). If breakpoints or tokens are found, reviewers use them. Otherwise they fall back to M3 + HIG defaults. This means **Tailwind projects are not flagged for "wrong" breakpoints** — the skill adapts.
+Before dispatching reviewers, the skill probes for `tailwind.config.*`, Panda, `styled-system`, `globals.css`, token files, and `package.json` dependencies (≤ 500ms, time-boxed). Breakpoints and tokens found are handed to reviewers; i18n/chart libraries found feed the specialist draft signals. **Tailwind projects are not flagged for "wrong" breakpoints** — the skill adapts.
 
 ---
 
-## Reviewers
+## The Panel
 
 ### 🎯 UX Strategist
 
@@ -118,8 +150,7 @@ Grounded in WCAG 2 / APCA, Apple HIG, and Material Design 3 window size classes:
 - Touch targets (≥ 44×44px Apple HIG / ≥ 48dp Material, ≥ 8px spacing)
 - Keyboard navigation, focus indicators, semantic alt text & aria-labels
 - Loading / error / empty states, visible form labels with required indicators
-- **Responsive design** — Mobile ≤ 599 / Tablet 600–839 / Desktop 840–1199 / Large ≥ 1200 (M3 compact/medium/expanded/large window size classes). Uses **your project's breakpoints** when the probe finds them (Tailwind, Panda, etc.). Layout must adapt, not just shrink; hamburger requires `aria-expanded` + ESC + body scroll lock
-- Semantic color tokens over raw hex, consistent z-index scale
+- **Responsive design** — Mobile ≤ 599 / Tablet 600–839 / Desktop 840–1199 / Large ≥ 1200 (M3 window size classes). Uses **your project's breakpoints** when the probe finds them. Layout must adapt, not just shrink; hamburger requires `aria-expanded` + ESC + body scroll lock
 
 ### ✨ Craft Reviewer
 
@@ -127,11 +158,10 @@ Reviews code the way a design lead reviews a junior's work — *"would I put my 
 
 - Layout rhythm and intentional proportions (the focal-point test)
 - **Spacing grid** — every value a multiple of 4 (Tailwind `p-[13px]` fails)
-- **Typography System (M3 + Apple HIG synthesis)** — every text style maps to a *role* (Display / Headline / Title / Body / Label / Caption), not a raw px value. Reference scale spans Mobile/Tablet/Desktop with paired sizes + line-heights + weights + tracking. Body ≥ 16px on mobile (iOS auto-zoom + HIG Dynamic Type baseline). Tabular numerals on data, real italic cuts only, multi-axis hierarchy beyond size alone, variable-font axes where available.
-- Surface depth through tonal shifts — the *border-removal test*
-- One committed depth strategy (no mixing borders + shadows + surface shifts)
+- **Typography System (M3 + Apple HIG synthesis)** — every text style maps to a *role* (Display / Headline / Title / Body / Label / Caption), not a raw px value. Body ≥ 16px on mobile, real italic cuts only, multi-axis hierarchy beyond size alone
+- Surface depth through tonal shifts — the *border-removal test*; one committed depth strategy
 - CSS structure quality — no negative-margin hacks, no calc() workarounds, no absolute-position escapes
-- **Modern CSS adoption (2024–2026 baseline)** — flags missing use of container queries (`@container`), logical properties (`margin-inline`, `padding-block`), `:has()`, `:is()`/`:where()`, CSS nesting, OKLCH / Display-P3, View Transitions API, and `@layer` cascade control — but only where the project would meaningfully benefit
+- **Modern CSS adoption (2025–2026 baseline)** — container queries, `:has()`, `:is()`/`:where()`, CSS nesting, OKLCH / Display-P3, View Transitions API, `@layer` — flagged only where the project would meaningfully benefit
 - The *swap test* — would defaults feel any different?
 
 ### 🎬 Motion & Polish Reviewer
@@ -141,11 +171,35 @@ Based on [Emil Kowalski's](https://emilkowal.ski/) design engineering principles
 - Easing selection (ease-out for entries, ease-in for exits, custom curves for punch)
 - Duration limits (<300ms for UI elements; hero/marketing may exceed deliberately)
 - Hardware acceleration (`transform`, `opacity`, `filter`, `clip-path` only)
-- Button `:active` states, hover media queries (`@media (hover: hover) and (pointer: fine)`)
-- `prefers-reduced-motion` support, asymmetric enter/exit timing, stagger (30–80ms)
-- **View Transitions API** and scroll-driven animations where relevant
-- No animations on 100+×/day shortcuts (save, submit) — or drop to <50ms
-- Output uses **Before | After | Why** table format with per-row severity + confidence
+- Button `:active` states, hover media queries, `prefers-reduced-motion` support
+- Asymmetric enter/exit timing, stagger (30–80ms), View Transitions, scroll-driven animations
+- Output uses **Before | After | Why** table format with per-row dimension, severity, and confidence
+
+### 🧱 Token & Theme Architect *(specialist)*
+
+Token architecture and theming: primitive→semantic→component tiers, no palette primitives in components, declared z-index scale, one coherent dark-mode mechanism with `color-scheme` and complete theming (shadows and borders adapt too, not just background), no hard-coded inversion-breakers, state variants derived from tokens.
+
+### 🚀 Performance & Rendering *(specialist)*
+
+Load-time rendering outside animation: reserved image space (no CLS), correct lazy/priority loading, `srcset` + modern formats, `font-display` + preload, `content-visibility` on long sections, no resting `will-change`, no large-area blur/backdrop-filter paint bombs, sane DOM depth, video posters.
+
+### 🌍 i18n & Adaptivity *(specialist)*
+
+Survival under translation and RTL: logical properties, flipped directional icons, +30–50% text-expansion tolerance, truncation with full-value affordances, `Intl.*` locale formats, correct `lang` attributes, no text in images, Unicode-safe styling (no letter-spacing on CJK, careful `text-transform`).
+
+### 🧭 Content & Microcopy *(specialist)*
+
+The words themselves: verb-led CTAs, error messages that say what happened and how to fix it, empty states that sell the next action, one capitalization convention, placeholders as examples not instructions, consistent tone, no raw jargon, progressive feedback ("Saving…" → "Saved").
+
+### 📊 Data-Viz *(specialist)*
+
+Charts and numeric displays: intentional categorical palettes, sequential scales for ordered data, redundant (non-color-alone) encoding, zero-baseline bars, labeled axes with units, direct labeling over legends, tabular numerals with right-aligned columns, restrained data-ink, in-frame empty/loading chart states.
+
+---
+
+## Adversarial Verification
+
+After consolidation, every 🔴 Urgent consensus finding is handed to its own verifier agent whose only job is to **refute it** against the actual source: does the cited evidence exist, is the claim technically correct, does project context already mitigate it? Confirmed findings get a ✓; refuted ones move to the ⚡ section with the refutation shown — never silently deleted. `--verify=all` extends this to 🟡 Recommended findings; `--verify=off` skips the wave.
 
 ---
 
@@ -164,96 +218,75 @@ A fictional SaaS landing page (TaskFlow) reviewed and rebuilt using this skill �
 | 🎬 Motion & Polish | 4/10 | 8.8/10 |
 | **Overall** | **4.0/10** | **8.9/10** |
 
-### What the *after* version actually applied
-
-The same content, restructured with everything the panel surfaced:
-
-- **Responsive system** — explicit Mobile/Tablet/Desktop breakpoints (599 / 1023 / 1024) with layouts that *re-compose* (asymmetric features grid 5+7 → 4+4+4 → 12-span), navigation pattern that swaps to a real hamburger with `aria-expanded`, ESC-to-close and body scroll lock, and section padding that steps `80 → 96 → 128px`.
-- **Typography system** — Fraunces (display) + Inter (text) on the M3+HIG scale: Display L `36 → 48 → 57px`, Body L `16 → 16 → 17px` with paired line-heights and tracking that turns negative on display sizes. Italic emphasis on key words uses the real Fraunces italic cut. Pricing uses `font-variant-numeric: tabular-nums lining-nums`.
-- **Motion** — `cubic-bezier(0.23, 1, 0.32, 1)` on UI transitions, `:active { transform: scale(0.97) }` everywhere clickable, `IntersectionObserver` reveal with geometric stagger sorted by `getBoundingClientRect`, `prefers-reduced-motion` honored, `<noscript>` fallback so animated content is visible without JS.
-
 ### Sample Report
 
 ```
 # 🎨 Design Review Panel Results
 
-**Target:** `src/components/Button.tsx`
-**Reviewers:** UX Strategist · Craft Reviewer · Motion & Polish Reviewer
+**Target:** `src/app/dashboard/page.tsx`
+**Panel (5 reviewers):** 🎯 UX · ✨ Craft · 🎬 Motion · 🧱 Tokens · 📊 Data-Viz
+**Drafting:** tokens: 14 custom properties + dark: classes · dataviz: recharts import · perf/i18n/content: no signals
+**Contrast mode:** wcag · **Verification:** urgent (3 confirmed / 1 refuted)
 
-## Overall Score
+## Overall
 
-| Reviewer           | Score | Key Findings              |
-|--------------------|-------|---------------------------|
-| 🎯 UX Strategist   | 7/10  | missing focus ring, no aria-label |
-| ✨ Craft Reviewer   | 6/10  | default spacing, flat hierarchy   |
-| 🎬 Motion & Polish | 5/10  | no active state, ease-in used     |
-| **Overall**        | **6.0/10** |                          |
+| Reviewer            | Score | Key Findings                       |
+|---------------------|-------|------------------------------------|
+| 🎯 UX Strategist    | 7/10  | missing focus ring, no aria-label  |
+| ✨ Craft Reviewer    | 6/10  | default spacing, flat hierarchy    |
+| 🎬 Motion & Polish  | 5/10  | no active state, ease-in used      |
+| 🧱 Token & Theme    | 6.5/10| primitives in components           |
+| 📊 Data-Viz         | 5.5/10| rainbow palette, no zero baseline  |
+| **Overall (median of 5)** | **6.0/10** |                       |
 
 ## 🔴 Urgent Fixes (2+ reviewers agree)
-1. No `:active` / press feedback — flagged by Craft + Motion reviewers
-2. Missing `prefers-reduced-motion` — flagged by UX + Motion reviewers
+1. ✓ No `:active` / press feedback — flagged by Craft + Motion
+2. ✓ Chart series colors: palette primitives with no semantic mapping — flagged by Tokens + Data-Viz
 
-## 🟡 Recommended Improvements
-3. Add visible focus ring for keyboard users (UX)
-4. Typography relies on size alone — add weight variation (Craft)
+## ⚡ Refuted Findings
+- ~~"Missing prefers-reduced-motion"~~ — verifier found a global guard in app/globals.css L112
 
 ...
 ```
 
 ---
 
-## Reference Tables Embedded in the Skill
-
-### Responsive breakpoints (M3 window size classes)
-
-| Breakpoint | Range          | M3 class  | Notes                                                  |
-|------------|----------------|-----------|--------------------------------------------------------|
-| Mobile     | ≤ 599px        | compact   | Hamburger nav, single column, body ≥ 16px              |
-| Tablet     | 600 – 1023px   | medium    | 2-col grids, condensed nav, padding steps up           |
-| Desktop    | ≥ 1024px       | expanded  | Full inline nav, multi-col layouts, generous padding   |
-
-### Typography reference scale (M3 + Apple HIG synthesis)
-
-| Role        | Mobile (px / lh) | Tablet      | Desktop     | Weight  | Tracking  |
-|-------------|------------------|-------------|-------------|---------|-----------|
-| Display L   | 36 / 44          | 48 / 56     | 57 / 64     | 400–600 | -0.022em  |
-| Headline L  | 28 / 36          | 32 / 40     | 36 / 44     | 600     | -0.018em  |
-| Title L     | 20 / 28          | 22 / 30     | 22 / 30     | 600     | -0.005em  |
-| Body L      | 16 / 24          | 16 / 24     | 17 / 26     | 400     | 0         |
-| Body M      | 14 / 20          | 14 / 20     | 15 / 22     | 400     | 0         |
-| Label L     | 14 / 20          | 14 / 20     | 14 / 20     | 500–600 | 0.01em    |
-| Caption     | 12 / 16          | 12 / 16     | 13 / 18     | 400     | 0.005em   |
-
-The Craft Reviewer flags any `--font-18` style raw-size variable, demands `font-variant-numeric: tabular-nums` on numeric data, and rejects synthesized italic when no italic cut exists.
-
----
-
 ## How It Works
 
-1. You invoke `/design-review-panel` with a file path
-2. The skill reads your source code
-3. Three Agent subprocesses launch **in parallel** — each with embedded review criteria
-4. Results are cross-referenced for consensus and conflicts
-5. A unified report is generated in your language
+1. You invoke `/design-review-panel` with a file path, glob, or screenshot
+2. The skill probes project conventions (breakpoints, tokens, dependencies)
+3. The panel is composed: core trio + specialists whose signals fire (no fixed cap)
+4. All reviewers launch **in parallel**, each with an exclusive, transfer-adjusted scope
+5. Findings are cross-referenced by dimension tag; consensus issues get an **adversarial verification wave**
+6. A unified report is generated in your language
 
 ```
-┌─────────────────────────────────┐
-│  /design-review-panel file.tsx  │
-└──────────────┬──────────────────┘
-               │
-    ┌──────────┼──────────┐
-    ▼          ▼          ▼
-┌────────┐ ┌────────┐ ┌────────┐
-│ 🎯 UX  │ │ ✨Craft│ │🎬Motion│
-│Strategy│ │Reviewer│ │& Polish│
-└───┬────┘ └───┬────┘ └───┬────┘
-    │          │          │
-    └──────────┼──────────┘
+┌────────────────────────────────────┐
+│  /design-review-panel target.tsx   │
+└──────────────┬─────────────────────┘
                ▼
-    ┌─────────────────────┐
-    │  Unified Report     │
-    │  🔴 🟡 🟢 ⚡        │
-    └─────────────────────┘
+      ┌─────────────────┐
+      │  Project probe  │──► draft signals
+      └────────┬────────┘
+    ┌─────┬────┼────┬───────┬─ ── ── ─┐
+    ▼     ▼    ▼    ▼       ▼         ▼
+┌──────┐┌─────┐┌──────┐┌────────┐┌ ─ ─ ─ ┐
+│🎯 UX ││✨Cra ││🎬 Mo ││🧱Tokens││📊 ⋯ 🚀
+└──┬───┘└──┬──┘└──┬───┘└───┬────┘└ ─ ┬ ─ ┘
+   └───────┴──────┼────────┴─────────┘
+                  ▼
+        ┌──────────────────┐
+        │  Consolidation   │
+        └────────┬─────────┘
+                 ▼
+        ┌──────────────────┐
+        │ Verify wave (🔴) │  one refuter per finding
+        └────────┬─────────┘
+                 ▼
+        ┌──────────────────┐
+        │  Unified Report  │
+        │  🔴✓ 🟡 🟢 ⚡     │
+        └──────────────────┘
 ```
 
 ---

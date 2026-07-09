@@ -1,7 +1,7 @@
 {
   "name": "design-review-panel",
-  "description": "3-person design review panel with exclusive scopes, project-aware probing (Tailwind/Panda/design tokens), scoped runs (--only), role hints (--context), and WCAG/APCA contrast modes. UX Strategist, Craft Reviewer, and Motion/Polish Reviewer run in parallel and produce a unified, evidence-cited report.",
-  "version": "1.1.0",
+  "description": "Dynamic design review panel with no fixed reviewer cap: a core trio (UX Strategist, Craft Reviewer, Motion/Polish) plus auto-drafted specialists (Token/Theme Architect, Performance & Rendering, i18n & Adaptivity, Content & Microcopy, Data-Viz). Exclusive scopes with ownership transfer, project-aware probing (Tailwind/Panda/design tokens), scoped runs (--only/--add/--panel), role hints (--context), WCAG/APCA contrast modes, and adversarial verification of consensus findings (--verify). All reviewers run in parallel and produce a unified, evidence-cited report.",
+  "version": "2.0.0",
   "author": {
     "name": "jmlee"
   },
