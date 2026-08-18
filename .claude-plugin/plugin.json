@@ -1,7 +1,7 @@
 {
   "name": "design-review-panel",
-  "description": "Dynamic design review panel with no fixed reviewer cap: a core trio (UX Strategist, Craft Reviewer, Motion/Polish) plus auto-drafted specialists (Token/Theme Architect, Performance & Rendering, i18n & Adaptivity, Content & Microcopy, Data-Viz). Exclusive scopes with ownership transfer, project-aware probing (Tailwind/Panda/design tokens), scoped runs (--only/--add/--panel), role hints (--context), WCAG/APCA contrast modes, and adversarial verification of consensus findings (--verify). All reviewers run in parallel and produce a unified, evidence-cited report.",
-  "version": "2.0.0",
+  "description": "Dynamic design review panel with verdicts and no fixed reviewer cap: a core trio (UX Strategist, Craft Reviewer, Motion/Polish) plus auto-drafted specialists (Deep Accessibility, Token/Theme Architect, Performance & Rendering, i18n & Adaptivity, Content & Microcopy, Data-Viz). Criteria distilled from Emil Kowalski's animation skills, Jakub Krehel's better-* suite, Paul Bakaus's Impeccable, and Vercel's Web Interface Guidelines. Exclusive scopes with ownership transfer, severity-floor escalation triggers, root-cause collapse, diff-scoped review (--diff), depth tiers (--depth), opportunity hunting (--mode=opportunities), safe auto-fixes (--apply), WCAG/APCA contrast modes, and adversarial verification (--verify). All reviewers run in parallel and produce a unified, evidence-cited report ending in a Block / Needs changes / Approve verdict.",
+  "version": "3.0.0",
   "author": {
     "name": "jmlee"
   },

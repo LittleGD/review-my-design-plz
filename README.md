@@ -1,11 +1,11 @@
 # Design Review Panel
 
 <p align="center">
-  <strong>A Review Panel That Sizes Itself to Your Component</strong>
+  <strong>A Review Panel That Sizes Itself to Your Component — and Gives You a Verdict</strong>
 </p>
 
 <p align="center">
-  A core trio of design reviewers — plus specialists drafted automatically when your code needs them — examine your UI in parallel and deliver a unified, verified, prioritized report.
+  A core trio of design reviewers — plus specialists drafted automatically when your code needs them — examine your UI in parallel and deliver a unified, verified, prioritized report ending in an explicit <strong>Block / Needs changes / Approve</strong> verdict.
 </p>
 
 <p align="center">
@@ -19,44 +19,46 @@
 
 ## What This Does
 
-One command assembles a design review panel for your UI code. Three core reviewers always serve; up to five specialists are **auto-drafted when the target shows relevant signals** (chart imports draft the Data-Viz reviewer, dark-mode classes draft the Token Architect, i18n libraries draft the i18n reviewer…). There is **no fixed cap on panel size** — the panel is as large as the target warrants.
+One command assembles a design review panel for your UI code. Three core reviewers always serve; up to six specialists are **auto-drafted when the target shows relevant signals** (chart imports draft the Data-Viz reviewer, dialogs and heavy ARIA draft the Deep Accessibility reviewer, dark-mode classes draft the Token Architect…). There is **no fixed cap on panel size** — the panel is as large as the target warrants.
 
-All reviewers run **in parallel**, each with an **exclusive scope**. Findings are cross-referenced, consensus issues are **adversarially verified** by a second wave of agents that try to refute them against your actual source, and everything lands in one actionable report with evidence citations.
+All reviewers run **in parallel**, each with an **exclusive scope**. Findings are cross-referenced and collapsed to root causes, urgent issues are **adversarially verified** by a second wave of agents that try to refute them against your actual source, and everything lands in one actionable report with evidence citations — headed by a verdict, not just a score.
 
-**No dependencies.** All review criteria are self-contained — you don't need to install any other skills or plugins.
+**Review criteria are distilled from the design-engineering canon:** Emil Kowalski's animation skills (frequency gate, duration budgets, exact easing curves), Jakub Krehel's `better-*` suite (escalation triggers, rendered-pair contrast, forms & focus batteries), Paul Bakaus's Impeccable (named anti-slop patterns), Vercel's Web Interface Guidelines, and Apple HIG / Material 3. **No dependencies** — everything is self-contained.
 
 ### Core trio (always on)
 
 | Reviewer | Owns (exclusive) |
 |----------|------------------|
-| 🎯 **UX Strategist** | Accessibility (WCAG / APCA), touch targets, **3-tier responsive breakpoints** (M3 window size classes), forms, keyboard navigation, empty/error/loading states |
-| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **M3 + Apple HIG typography system**, surface depth, CSS structure, intent vs defaults, **modern CSS** (container queries, `:has()`, CSS nesting, OKLCH, view transitions, `@layer`) |
-| 🎬 **Motion & Polish** | Animation decisions, easing curves, duration, hardware acceleration, `prefers-reduced-motion`, hover media queries, scroll-driven animations, asymmetric enter/exit, stagger |
+| 🎯 **UX Strategist** | Contrast (rendered-pair measurement), touch targets (WCAG 24px floor vs HIG 44px bar), **responsive & 320px/200%-zoom reflow**, forms hardening (paste, autocomplete, submit states), destructive-action safety, empty/error/loading states |
+| ✨ **Craft Reviewer** | Composition rhythm, spacing grid, **concentric radius & optical alignment**, M3 + Apple HIG typography (with 45–75ch measure & micro-typography), surface depth with numeric thresholds, **named anti-slop patterns** (ghost card, side-tab, nested cards…), modern CSS |
+| 🎬 **Motion & Polish** | **Whether-to-animate gate** (frequency tiers + purpose vocabulary), per-surface duration budgets, canonical bezier curves, springs & bounce rules, gesture physics, `prefers-reduced-motion` done right, asymmetric enter/exit, stagger |
 
 ### Specialists (drafted on signal, or via `--add` / `--panel=full`)
 
 | Reviewer | Owns (exclusive) | Drafted when |
 |----------|------------------|--------------|
-| 🧱 **Token & Theme Architect** | Token architecture (primitive→semantic→component), semantic color tokens, z-index scale, **dark mode & theming** (`light-dark()`, `color-scheme`), token naming | Token files, ≥10 custom properties, or dark-mode markers |
-| 🚀 **Performance & Rendering** | Image dimensions/CLS, lazy loading, `fetchpriority`, font loading, `content-visibility`, resting `will-change`, expensive paint | Images, video, `@font-face`, or marketing/landing context |
-| 🌍 **i18n & Adaptivity** | Logical properties, RTL safety, text-expansion tolerance, truncation, `Intl.*` locale formats, `lang` attributes | i18n libraries, `dir=`, locale files |
-| 🧭 **Content & Microcopy** | Wording of CTAs/errors/empty states, capitalization system, placeholder copy, tone, progressive feedback | Copy-heavy targets or marketing/auth context |
-| 📊 **Data-Viz** | Chart color scales, redundant encoding, axes/zero-baseline, legends, tabular numerals, number formatting | Chart libraries, `<canvas>`, data tables, dashboard context |
+| ♿ **Deep Accessibility** | Focus management (trap/restore/`inert`), roving tabindex & APG patterns, ARIA semantics, live regions, accessible-name computation, forced-colors, 200% zoom | Dialogs/popovers, ≥5 aria-* attributes, composite widgets, form/auth context |
+| 🧱 **Token & Theme Architect** | Token architecture (primitive→semantic→component), ramp hygiene, borrowed tokens, `primary` collisions, control tokens, **dark mode & theming** (`light-dark()`, `color-scheme`) | Token files, ≥10 custom properties, or dark-mode markers |
+| 🚀 **Performance & Rendering** | Image dimensions/CLS, lazy loading, font loading, `content-visibility`, virtualization (>50 rows), GIF→video, layout-read thrash, expensive paint | Images, video, `@font-face`, long lists, or marketing/landing context |
+| 🌍 **i18n & Adaptivity** | Logical properties, RTL flip/never-flip rules, text-expansion tolerance, **message construction & pluralization**, `Intl.*` locale formats | i18n libraries, `dir=`, locale files |
+| 🧭 **Content & Microcopy** | CTAs, error/empty-state wording, flow vocabulary, toggle/link labels, voice, tone-by-stakes, **AI-copy tells** | Copy-heavy targets or marketing/auth context |
+| 📊 **Data-Viz** | Chart palette math (lightness matching, 15° hue rule), redundant encoding, zero-baseline, chart-internal contrast, tabular numerals | Chart libraries, `<canvas>`, data tables, dashboard context |
 
-Scopes stay exclusive even as the panel grows: when a specialist is drafted, overlapping dimensions **transfer ownership** (e.g., semantic color tokens move from UX to the Token Architect for that run), so "2+ reviewers agree" remains a true consensus signal, never a duplicate-checklist artifact.
+Scopes stay exclusive even as the panel grows: when a specialist is drafted, overlapping dimensions **transfer ownership** (e.g., keyboard navigation moves from UX to Deep Accessibility for that run), so consensus remains a true signal, never a duplicate-checklist artifact.
 
 ### The Report
 
-- **Panel composition** — which reviewers served and *why* each specialist was or wasn't drafted
-- **Project context detected** — Tailwind / Panda / design-token probes surface the project's real breakpoints and tokens, so reviewers adapt instead of imposing defaults
-- **🔴 Urgent Fixes** — issues flagged by 2+ reviewers, each **✓-verified** by an adversarial agent that tried to refute it against your source
-- **🟡 Recommended** — important issues from a single reviewer
-- **🟢 Polish** — minor improvements
-- **⚡ Disagreements & Refuted Findings** — conflicting opinions and any finding the verification wave shot down (never silently deleted)
-- **Action Plan** — numbered items ordered by priority
-- **Scope caveats** — what each reviewer couldn't evaluate, plus which specialists were *not* drafted so you know what wasn't checked
+- **Verdict first** — 🚫 Block / ⚠️ Needs changes / ✅ Approve, derived from finding tiers, never from the score
+- **Severity floor** — eight escalation triggers (no accessible name, no focus indicator, zoom-capped viewport, unguarded destructive action…) are 🔴 Urgent even when only one reviewer catches them
+- **🔴 Urgent** — escalation triggers and consensus findings, each **✓-verified** by an adversarial agent that tried to refute it against your source
+- **🟡 Recommended / 🟢 Polish** — root-cause-collapsed ("raw hex in 7 files → one missing token" is *one* finding), tagged **[auto-fixable]** or **[judgment]**
+- **✅ Strengths** — 2–4 things done well with evidence, plus the single **highest-leverage change**
+- **🗑️ Considered but Rejected** — candidates examined and cleared, with the criterion that cleared them (anti-padding: zero findings is a valid result)
+- **⚡ Disagreements & Refuted Findings** — never silently deleted
+- **Coverage table** — "Clear (inspected, nothing found)" vs "Not drafted" vs "Not reviewed", so you know exactly what wasn't checked
+- **Trend & Outcomes** — re-runs read the previous snapshot and give every prior finding an explicit status (Fixed / Still open / Won't fix)
 
-Every finding cites evidence (line range or region) and a canonical dimension tag. Overall score is the **median of all participating reviewers** (robust to outliers at any panel size). Reports are generated in **English** or **Korean** based on your input language.
+Reports are generated in **English** or **Korean** based on your input language.
 
 ---
 
@@ -85,54 +87,62 @@ Restart Claude Code after installation.
 # Auto-sized panel (core trio + signal-drafted specialists)
 /design-review-panel src/components/Button.tsx
 
-# Legacy 3-person behavior
-/design-review-panel src/components/Button.tsx --panel=core
+# Review only what a change touched — findings become Introduced / Regression / Pre-existing
+/design-review-panel src/components/Button.tsx --diff
+/design-review-panel src/components/Button.tsx --diff=main
 
-# Run the entire 8-role roster
-/design-review-panel src/app/dashboard/page.tsx --panel=full
+# Quick pre-commit sanity check (5 findings max) vs exhaustive audit
+/design-review-panel src/components/Nav.tsx --depth=quick
+/design-review-panel src/app/dashboard/page.tsx --depth=deep
 
-# Exact panel of your choosing
+# Hunt for MISSING craft instead of judging what exists (capped at 5–7, gate-filtered)
+/design-review-panel src/components/Card.tsx --mode=opportunities
+
+# Apply the mechanically-safe fixes after the report
+/design-review-panel src/components/Form.tsx --apply
+
+# Panel control
+/design-review-panel src/components/Button.tsx --panel=core        # legacy trio
+/design-review-panel src/app/dashboard/page.tsx --panel=full       # entire 9-role roster
 /design-review-panel src/components/Hero.tsx --only=craft,motion,perf
-
-# Force-draft specialists on top of auto selection
 /design-review-panel src/components/Chart.tsx --add=dataviz,tokens
 
-# Role hint (weights criteria AND feeds draft signals)
+# Context, contrast, verification
 /design-review-panel app/marketing/page.tsx --context=marketing
-
-# APCA contrast instead of WCAG 2
 /design-review-panel src/components/Card.tsx --contrast=apca
-
-# Verify recommended findings too, or skip verification
-/design-review-panel src/components/Nav.tsx --verify=all
+/design-review-panel src/components/Nav.tsx --verify=all           # verify 🟡 too
 /design-review-panel src/components/Nav.tsx --verify=off
 
-# Review a screenshot
+# Screenshots and file sets
 /design-review-panel screenshots/dashboard.png --context=dashboard
-
-# Review a small set of files together
 /design-review-panel "src/components/Card/*.{tsx,css}"
 ```
 
 ### Grammar
 
 ```
-<path|glob|image> [--only=<list>] [--add=<list>] [--panel=<mode>] [--context=<hint>] [--contrast=<mode>] [--verify=<mode>]
+<path|glob|image> [--only=<list>] [--add=<list>] [--panel=<mode>] [--depth=<mode>] [--diff[=<base>]]
+                  [--mode=<mode>] [--apply] [--context=<hint>] [--contrast=<mode>] [--verify=<mode>]
 ```
 
 - `--panel` — `auto` (default), `core` (trio only), `full` (entire roster)
-- `--only` — exact panel from `ux,craft,motion,tokens,perf,i18n,content,dataviz`
+- `--only` — exact panel from `ux,craft,motion,a11y,tokens,perf,i18n,content,dataviz`
 - `--add` — force-draft specialists on top of the panel-mode selection
+- `--depth` — `quick` (≤5 findings, 🔴🟡 only), `standard` (default, ≤15), `deep` (uncapped, includes 🟢). Caps never drop escalation-trigger findings
+- `--diff[=<base>]` — change-scoped review; pre-existing issues are capped, sectioned apart, and excluded from the verdict
+- `--mode` — `review` (default) or `opportunities` (generative hunt with a four-question gate and hard cap)
+- `--apply` — apply `[auto-fixable]` findings after the report; `[judgment]` findings always ask first
 - `--context` — role hint like `marketing`, `dashboard`, `design-system`, `form`, `landing`, `auth`
 - `--contrast` — `wcag` (default) or `apca`
-- `--verify` — `urgent` (default: adversarially verify consensus findings), `all`, `off`
+- `--verify` — `urgent` (default), `all`, `off`
 
 ### Supported Inputs
 
 - **Source code files** — `.tsx`, `.jsx`, `.vue`, `.svelte`, `.html`, `.css`, etc.
 - **Globs / small directories** — up to 5 files reviewed together as one target set
 - **Screenshots** — `.png`, `.jpg`, `.webp`, `.gif` (agents Read the image themselves)
-- **Large files** (>500 lines) — first 250 + last 50 lines inlined, full file Readable on demand (never inlined once per agent)
+- **Large files** (>500 lines) — excerpt inlined, full file Readable on demand
+- **Diffs** — `--diff` reviews changed hunks, greps the *removed* side for silently-deleted a11y attributes, and statuses every finding
 
 ### Project Probe
 
@@ -144,62 +154,72 @@ Before dispatching reviewers, the skill probes for `tailwind.config.*`, Panda, `
 
 ### 🎯 UX Strategist
 
-Grounded in WCAG 2 / APCA, Apple HIG, and Material Design 3 window size classes:
+Grounded in WCAG 2 / APCA, Apple HIG, and Material Design 3:
 
-- **Contrast** — WCAG (4.5:1 text, 3:1 large/UI) or APCA (Lc 75 body, Lc 60 large, Lc 45 non-text) via `--contrast` flag
-- Touch targets (≥ 44×44px Apple HIG / ≥ 48dp Material, ≥ 8px spacing)
-- Keyboard navigation, focus indicators, semantic alt text & aria-labels
-- Loading / error / empty states, visible form labels with required indicators
-- **Responsive design** — Mobile ≤ 599 / Tablet 600–839 / Desktop 840–1199 / Large ≥ 1200 (M3 window size classes). Uses **your project's breakpoints** when the probe finds them. Layout must adapt, not just shrink; hamburger requires `aria-expanded` + ESC + body scroll lock
+- **Contrast, measured right** — against the *rendered* background pair (nearest painted ancestor, worst region over images, both extremes under glass), per theme; disabled text still has a floor
+- **Touch targets with the right citation** — WCAG 2.5.8's 24px legal floor vs the 44px/48dp usability bar; pseudo-element hit-area extension; `touch-action: manipulation`
+- **Focus** — `:focus-visible` not bare `:focus`, no positive tabindex, ring perimeter checked against every adjacent background, `scroll-margin-top` under sticky headers
+- **Forms hardening** — never block paste (🔴), `autocomplete`/`inputmode`/`spellcheck`, submit disables *after* the request starts, validate on submit with focus-to-first-error, continuous label+control hit targets, unsaved-state warnings
+- **Reflow** — content reachable at 320px width and 200% zoom; `user-scalable=no` is an automatic 🔴
+- **Destructive actions** — confirmation or undo required; confirmation overuse flagged too (it trains click-through)
+- Live regions, heading hierarchy, skip links; loading / error / empty states
 
 ### ✨ Craft Reviewer
 
 Reviews code the way a design lead reviews a junior's work — *"would I put my name on this?"*
 
-- Layout rhythm and intentional proportions (the focal-point test)
-- **Spacing grid** — every value a multiple of 4 (Tailwind `p-[13px]` fails)
-- **Typography System (M3 + Apple HIG synthesis)** — every text style maps to a *role* (Display / Headline / Title / Body / Label / Caption), not a raw px value. Body ≥ 16px on mobile, real italic cuts only, multi-axis hierarchy beyond size alone
-- Surface depth through tonal shifts — the *border-removal test*; one committed depth strategy
-- CSS structure quality — no negative-margin hacks, no calc() workarounds, no absolute-position escapes
-- **Modern CSS adoption (2025–2026 baseline)** — container queries, `:has()`, `:is()`/`:where()`, CSS nesting, OKLCH / Display-P3, View Transitions API, `@layer` — flagged only where the project would meaningfully benefit
-- The *swap test* — would defaults feel any different?
+- **Concentric radius math** — `outerRadius = innerRadius + padding`, the most common thing that makes interfaces feel subtly off; optical alignment (icon-side padding −2px)
+- **Typography System (M3 + Apple HIG)** — role table plus **45–75ch measure**, heading rhythm, micro-typography (`…` not `...`, curly quotes, `text-wrap: balance/pretty`), the `min-w-0` truncation bug
+- **Surfaces with numbers** — +7/9/12% elevation steps, 0.05–0.12 border alpha, the 3-layer shadow-as-border recipe that collapses to a single ring in dark mode
+- **Named anti-slop patterns** — ghost card, side-tab accent, hero eyebrow chip, nested cards, gradient text, oversized h1, icon-tile-stack… flagged by name
+- **Browser surfaces** — unthemed `::selection`, `caret-color`, scrollbars: the cheapest tell that a page was assembled, not built
+- Spacing grid, modern CSS (container queries, `:has()`, OKLCH, view transitions), the swap test
 
 ### 🎬 Motion & Polish Reviewer
 
-Based on [Emil Kowalski's](https://emilkowal.ski/) design engineering principles — 17-point animation checklist:
+Emil Kowalski's design-engineering lens, now with his full decision framework:
 
-- Easing selection (ease-out for entries, ease-in for exits, custom curves for punch)
-- Duration limits (<300ms for UI elements; hero/marketing may exceed deliberately)
-- Hardware acceleration (`transform`, `opacity`, `filter`, `clip-path` only)
-- Button `:active` states, hover media queries, `prefers-reduced-motion` support
-- Asymmetric enter/exit timing, stagger (30–80ms), View Transitions, scroll-driven animations
-- Output uses **Before | After | Why** table format with per-row dimension, severity, and confidence
+- **The gate comes first** — frequency tiers (100+×/day = no animation, *ever*; keyboard-initiated actions never animate) and a closed purpose vocabulary; can't name a purpose → the fix is deletion, not adjustment
+- **Remedies in strict order** — delete → reduce → fix easing → fix origin → make interruptible → move to GPU → asymmetric timing → polish
+- **Exact reference values** — per-surface duration budgets (button 100–160ms … drawer 300–500ms) and canonical curves (`cubic-bezier(0.23, 1, 0.32, 1)` enter, iOS drawer curve for sheets); a 400ms drawer is *correct*, not a violation
+- **Reduced motion done right** — fewer and gentler, not zero; the global `0.01ms` kill-all is itself flagged
+- **Springs** — bounce 0 by default, 0.1–0.3 only when the gesture carried momentum; icon cross-fades at scale 0.25→1 + blur 4px→0
+- **Gesture physics** — pointer-down feedback, 1:1 tracking, ~10px hysteresis, velocity-based dismissal (>0.11 px/ms), rubber-banding, interruption from the live value
+- WCAG 2.2.2 autoplay controls, blur cost caps, SVG `<g>` transforms, `@starting-style`, View Transitions
+
+### ♿ Deep Accessibility *(specialist)*
+
+Screen-reader depth the generalist doesn't reach: dialog focus trap/restore/`inert`, roving tabindex per APG, accessible-name computation (label/aria mismatches break voice control), live regions that actually announce, no focusable children inside `aria-hidden`, forced-colors survival, widgets operable at 200% zoom.
 
 ### 🧱 Token & Theme Architect *(specialist)*
 
-Token architecture and theming: primitive→semantic→component tiers, no palette primitives in components, declared z-index scale, one coherent dark-mode mechanism with `color-scheme` and complete theming (shadows and borders adapt too, not just background), no hard-coded inversion-breakers, state variants derived from tokens.
+Token architecture and theming: primitive→semantic→component tiers, no borrowed tokens ("the fix is add the token, never reuse the nearest one"), `primary` naming collisions, ≥4 text-hierarchy levels, border progressions, control tokens, ramp hygiene with role mapping, dark mode designed rather than inverted.
 
 ### 🚀 Performance & Rendering *(specialist)*
 
-Load-time rendering outside animation: reserved image space (no CLS), correct lazy/priority loading, `srcset` + modern formats, `font-display` + preload, `content-visibility` on long sections, no resting `will-change`, no large-area blur/backdrop-filter paint bombs, sane DOM depth, video posters.
+Load-time rendering outside animation: reserved image space (no CLS), lazy/priority loading, `srcset` + modern formats, `font-display` + preload + woff2-only, `content-visibility`, virtualization for >50-item lists, GIF→`<video>`, preconnect hints, no resting `will-change`, batched layout reads, no large-area blur bombs.
 
 ### 🌍 i18n & Adaptivity *(specialist)*
 
-Survival under translation and RTL: logical properties, flipped directional icons, +30–50% text-expansion tolerance, truncation with full-value affordances, `Intl.*` locale formats, correct `lang` attributes, no text in images, Unicode-safe styling (no letter-spacing on CJK, careful `text-transform`).
+Survival under translation and RTL: logical properties, the flip/never-flip icon table (chevrons mirror; logos and play buttons never do), `<bdi>` for mixed-direction values, +30–50% text-expansion tolerance, **no concatenated messages** (`count === 1 ? 'item' : 'items'` fails — many languages have 3–6 plural forms), `Intl.*` formats, Unicode-safe styling.
 
 ### 🧭 Content & Microcopy *(specialist)*
 
-The words themselves: verb-led CTAs, error messages that say what happened and how to fix it, empty states that sell the next action, one capitalization convention, placeholders as examples not instructions, consistent tone, no raw jargon, progressive feedback ("Saving…" → "Saved").
+The words themselves: verb-led CTAs, errors that say what happened + how to fix it, one term per flow ("Continue" XOR "Next"), toggles that label the ON state, links that name their destination, second-person voice, tone-by-stakes (zero playfulness on destructive confirms), and **AI-copy tells** with firing thresholds (buzzwords, aphoristic cadence at 3+ sections, em-dash saturation).
 
 ### 📊 Data-Viz *(specialist)*
 
-Charts and numeric displays: intentional categorical palettes, sequential scales for ordered data, redundant (non-color-alone) encoding, zero-baseline bars, labeled axes with units, direct labeling over legends, tabular numerals with right-aligned columns, restrained data-ink, in-frame empty/loading chart states.
+Charts and numeric displays: palette math (perceived-lightness matching, the 15° hue-collision rule), redundant non-color encoding, zero-baseline bars, chart-internal contrast (marks ≥3:1, labels ≥4.5:1 — a scope no generalist covers), pie ≤5 categories, tabular numerals, in-frame empty/loading states.
 
 ---
 
-## Adversarial Verification
+## Consolidation: How Findings Become a Verdict
 
-After consolidation, every 🔴 Urgent consensus finding is handed to its own verifier agent whose only job is to **refute it** against the actual source: does the cited evidence exist, is the claim technically correct, does project context already mitigate it? Confirmed findings get a ✓; refuted ones move to the ⚡ section with the refutation shown — never silently deleted. `--verify=all` extends this to 🟡 Recommended findings; `--verify=off` skips the wave.
+1. **Root-cause collapse** — symptoms sharing one cause merge into a single finding listing every location; the root-cause fix outranks its symptoms
+2. **Severity floor** — eight escalation triggers are 🔴 regardless of who (or how many) flagged them: no accessible name · no focus indicator · pointer-only path · ignored `prefers-reduced-motion` · clipped at 320px/200% zoom · failed contrast · color-only meaning · unguarded destructive action
+3. **Consensus** — 2+ reviewers citing the same evidence region → 🔴 Urgent
+4. **Adversarial verification** — every 🔴 gets its own refuter agent checking the evidence exists, the claim is technically correct, project context doesn't already mitigate it, and the **evidence channel supports the claim** (no "contrast fails" from unrendered source, no "uses transition: all" from a screenshot)
+5. **Verdict** — any 🔴 remaining → 🚫 Block; only 🟡/🟢 → ⚠️ Needs changes; nothing actionable + full coverage → ✅ Approve. The median score is trend signal; it can never upgrade a Block
 
 ---
 
@@ -211,41 +231,51 @@ A fictional SaaS landing page (TaskFlow) reviewed and rebuilt using this skill �
 
 **👉 [littlegd.github.io/review-my-design-plz](https://littlegd.github.io/review-my-design-plz/)**
 
-| | Before | After |
-|---|---|---|
-| 🎯 UX Strategist | 4/10 | 9/10 |
-| ✨ Craft Reviewer | 4/10 | 8.8/10 |
-| 🎬 Motion & Polish | 4/10 | 8.8/10 |
-| **Overall** | **4.0/10** | **8.9/10** |
-
 ### Sample Report
 
 ```
 # 🎨 Design Review Panel Results
 
 **Target:** `src/app/dashboard/page.tsx`
-**Panel (5 reviewers):** 🎯 UX · ✨ Craft · 🎬 Motion · 🧱 Tokens · 📊 Data-Viz
-**Drafting:** tokens: 14 custom properties + dark: classes · dataviz: recharts import · perf/i18n/content: no signals
-**Contrast mode:** wcag · **Verification:** urgent (3 confirmed / 1 refuted)
+**Verdict:** 🚫 Block — 2 escalation-trigger findings (no accessible name, color-only meaning)
+**Trend:** Block (5🔴) → this run (2🔴)
+**Panel (6 reviewers):** 🎯 UX · ✨ Craft · 🎬 Motion · ♿ A11y · 🧱 Tokens · 📊 Data-Viz
+**Drafting:** a11y: dialog + 9 aria attrs · tokens: 14 custom properties · dataviz: recharts import · perf/i18n/content: no signals
+**Contrast mode:** wcag · **Verification:** urgent (3 confirmed / 1 refuted) · **Depth:** standard
 
 ## Overall
 
-| Reviewer            | Score | Key Findings                       |
-|---------------------|-------|------------------------------------|
-| 🎯 UX Strategist    | 7/10  | missing focus ring, no aria-label  |
-| ✨ Craft Reviewer    | 6/10  | default spacing, flat hierarchy    |
-| 🎬 Motion & Polish  | 5/10  | no active state, ease-in used      |
-| 🧱 Token & Theme    | 6.5/10| primitives in components           |
-| 📊 Data-Viz         | 5.5/10| rainbow palette, no zero baseline  |
-| **Overall (median of 5)** | **6.0/10** |                       |
+| Reviewer            | Score  | Key Findings                        |
+|---------------------|--------|-------------------------------------|
+| 🎯 UX Strategist    | 7/10   | zoom capped, submit disable bug     |
+| ✨ Craft Reviewer    | 6/10   | ghost cards, no measure             |
+| 🎬 Motion & Polish  | 5/10   | keyboard action animated            |
+| ♿ Deep A11y        | 5.5/10 | icon buttons unnamed, focus lost    |
+| 🧱 Token & Theme    | 6.5/10 | primitives in components            |
+| 📊 Data-Viz         | 5.5/10 | series 12° apart, no zero baseline  |
+| **Overall (median of 6)** | **5.75/10** |                        |
 
-## 🔴 Urgent Fixes (2+ reviewers agree)
-1. ✓ No `:active` / press feedback — flagged by Craft + Motion
-2. ✓ Chart series colors: palette primitives with no semantic mapping — flagged by Tokens + Data-Viz
+## 🔴 Urgent Fixes
+1. ⛔✓ [judgment] Icon-only toolbar buttons have no accessible name — A11y, L88–L104
+2. ⛔✓ [auto-fixable] Chart series distinguished by color alone, 12° hue apart — Data-Viz, L142
+3. ✓ [auto-fixable] Command-palette open animates 250ms on a keyboard action — Motion + UX (same region), L57
 
-## ⚡ Refuted Findings
-- ~~"Missing prefers-reduced-motion"~~ — verifier found a global guard in app/globals.css L112
+## ✅ Strengths
+- Consistent 4/8 spacing grid throughout (all 34 spacing values on-grid)
+- Drawer uses the iOS curve at 400ms — correct budget for the surface, L203
 
+**Highest-leverage change:** add semantic series tokens to the chart theme — it resolves
+both the color-only encoding and the primitives-in-components findings at once.
+
+## 🗑️ Considered but Rejected
+- transform-origin: center on the settings modal — exempt, modals stay centered (Motion)
+- 13px metadata caption — maps to project token --text-caption (Craft)
+
+## Coverage
+| Reviewer | Findings | Status |
+|----------|----------|--------|
+| 🌍 i18n  | —        | Not drafted: no i18n signals |
+| 🚀 Perf  | —        | Not drafted: no image/font signals |
 ...
 ```
 
@@ -253,40 +283,42 @@ A fictional SaaS landing page (TaskFlow) reviewed and rebuilt using this skill �
 
 ## How It Works
 
-1. You invoke `/design-review-panel` with a file path, glob, or screenshot
-2. The skill probes project conventions (breakpoints, tokens, dependencies)
+1. You invoke `/design-review-panel` with a file path, glob, screenshot, or `--diff`
+2. The skill probes project conventions (breakpoints, tokens, dependencies) and prior snapshots
 3. The panel is composed: core trio + specialists whose signals fire (no fixed cap)
-4. All reviewers launch **in parallel**, each with an exclusive, transfer-adjusted scope
-5. Findings are cross-referenced by dimension tag; consensus issues get an **adversarial verification wave**
-6. A unified report is generated in your language
+4. All reviewers launch **in parallel**, each with an exclusive, transfer-adjusted scope and a shared contract (injection defense, evidence-channel honesty, considered-but-rejected)
+5. Findings are root-cause-collapsed, floored against escalation triggers, and consensus-checked; 🔴 findings get an **adversarial verification wave**
+6. A verdict-first report is generated in your language; `--apply` then fixes the safe half
 
 ```
-┌────────────────────────────────────┐
-│  /design-review-panel target.tsx   │
-└──────────────┬─────────────────────┘
+┌─────────────────────────────────────────┐
+│  /design-review-panel target.tsx --diff │
+└──────────────┬──────────────────────────┘
                ▼
       ┌─────────────────┐
-      │  Project probe  │──► draft signals
+      │  Project probe  │──► draft signals + prior snapshot
       └────────┬────────┘
-    ┌─────┬────┼────┬───────┬─ ── ── ─┐
-    ▼     ▼    ▼    ▼       ▼         ▼
-┌──────┐┌─────┐┌──────┐┌────────┐┌ ─ ─ ─ ┐
-│🎯 UX ││✨Cra ││🎬 Mo ││🧱Tokens││📊 ⋯ 🚀
-└──┬───┘└──┬──┘└──┬───┘└───┬────┘└ ─ ┬ ─ ┘
-   └───────┴──────┼────────┴─────────┘
+    ┌─────┬────┼────┬───────┬────────┬─ ── ─┐
+    ▼     ▼    ▼    ▼       ▼        ▼      ▼
+┌──────┐┌─────┐┌──────┐┌──────┐┌────────┐┌ ─ ─ ┐
+│🎯 UX ││✨Cra ││🎬 Mo ││♿A11y││🧱Tokens││📊 ⋯
+└──┬───┘└──┬──┘└──┬───┘└──┬───┘└───┬────┘└ ─┬─ ┘
+   └───────┴──────┼───────┴────────┴────────┘
                   ▼
-        ┌──────────────────┐
-        │  Consolidation   │
-        └────────┬─────────┘
+        ┌───────────────────────┐
+        │ Consolidate:          │
+        │ root-cause collapse   │
+        │ + severity floor      │
+        └────────┬──────────────┘
                  ▼
         ┌──────────────────┐
         │ Verify wave (🔴) │  one refuter per finding
         └────────┬─────────┘
                  ▼
-        ┌──────────────────┐
-        │  Unified Report  │
-        │  🔴✓ 🟡 🟢 ⚡     │
-        └──────────────────┘
+        ┌────────────────────┐
+        │ 🚫/⚠️/✅ Verdict    │
+        │ Report + snapshot  │
+        └────────────────────┘
 ```
 
 ---
